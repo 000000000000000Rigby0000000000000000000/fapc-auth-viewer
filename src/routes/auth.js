@@ -1,5 +1,6 @@
 const express = require('express');
-const { getAuthorizationUrl, authCallbackMiddleware, authRefreshMiddleware, getUserProfile } = require('../controllers/auth.js');
+const { getAuthorizationUrl, getUserProfile } = require('../controllers/auth.js');
+const { authCallbackMiddleware, authRefreshMiddleware } = require('../middlewares/auth.js');
 
 let router = express.Router();
 

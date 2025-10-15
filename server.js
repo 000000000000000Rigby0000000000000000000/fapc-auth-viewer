@@ -7,6 +7,7 @@ let app = express();
 app.use(express.static('public'));
 app.use(session({ secret: SERVER_SESSION_SECRET, maxAge: 24 * 60 * 60 * 1000 }));
 app.use(require('./src/routes/auth.js'));
+// Add data management router here
 
 // Serve index.html at root
 app.get('/', (req, res) => {
