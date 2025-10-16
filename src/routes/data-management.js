@@ -12,76 +12,73 @@ let router = express.Router();
 
 router.use('/api/dm', authRefreshMiddleware);
 
-/***** Get Hubs route *****/
-router.get('...', async function (req, res) {
-  // Get access token from session
+router.get('/api/dm/hubs', async function (req, res) {
+  const accessToken = req.internalOAuthToken.access_token; // We need to retrieve this token from the session and use it when calling the APS API
   
   try {
-      // Get hubs from APS API
-      // const hubs = ...
-
+      const hubs = await getHubs(accessToken);
+      // const hubsInfo = [];
+      // for (const hub of hubs) {
+      //   const hubInfo = { id: hub.id, name: hub.attributes.name };
+      //   hubsInfo.push(hubInfo);
+      // }
+      // res.json(hubsInfo);
       res.json(hubs);
     } catch (err) {
       throw err;
     }
 });
 
-/***** Get Projects from a hub *****/
-router.get('...', async function (req, res, next) {
-  // Retrieve hub_id from request params
-  // Get access token from session
+router.get('/api/dm/hubs/:hub_id/projects', async function (req, res, next) {
+  const { hub_id } = req.params;
+  const accessToken = req.internalOAuthToken.access_token; // We need to retrieve this token from the session and use it when calling the APS API
 
   try {
-    // Get projects from APS API
-    // const projects = ...
-
+    const projects = await getProjects(hub_id, accessToken);
+    // const projectsInfo = [];
+    // for (const project of projects) {
+    //   const projectInfo = { id: project.id, name: project.attributes.name };
+    //   projectsInfo.push(projectInfo);
+    // }
+    // res.json(projectsInfo);
     res.json(projects);
   } catch (err) {
     throw err;
   }
 });
 
-/***** Get Top Contents of a project *****/
-router.get('...', async function (req, res, next) {
-  // Retrieve hub_id and project_id from request params
-  // Get access token from session
+router.get('/api/dm/hubs/:hub_id/projects/:project_id/contents', async function (req, res) {
+  const { hub_id, project_id } = req.params;
+  const accessToken = req.internalOAuthToken.access_token; // We need to retrieve this token from the session and use it when calling the APS API
 
   try {
-      // Get top contents of a project from APS API
-      // const topContents = ...
-
-      res.json(topContents);
+      const entries = await getProjectTopFolders(hub_id, project_id, accessToken);
+      res.json(entries);
   } catch (err) {
       throw err;
   }
 });
 
+router.get('/api/dm/hubs/:hub_id/projects/:project_id/folders/:folder_id', async function (req, res) {
+  const { hub_id, project_id, folder_id } = req.params;
+  const encodedUrn = encodeURIComponent(folder_id);
 
-/***** Get Contents from a folder *****/
-router.get('...', async function (req, res) {
-  // Retrieve hub_id, project_id and folder_id from request params
-  const encodedUrn = encodeURIComponent(folder_id); // Encode the folder_id to be used in the URL
-  // Get access token from session
-
+  const accessToken = req.internalOAuthToken.access_token; // We need to retrieve this token from the session and use it when calling the APS API
+  
   try {
-      // Get contents of a folder from APS API
-      // const folderContents = ...
-
-      res.json(folderContents);
+      const entries = await getFolderContents(project_id, encodedUrn, accessToken);
+      res.json(entries);
   } catch (err) {
       throw err;
   }
 });
 
-/***** Get Versions of an item *****/
-router.get('...', async function (req, res, next) {
-  // Retrieve project_id and item_id from request params
-  // Get access token from session
+router.get('/api/dm/hubs/:hub_id/projects/:project_id/contents/:item_id/versions', async function (req, res, next) {
+  const { project_id, item_id } = req.params;
+  const accessToken = req.internalOAuthToken.access_token; // We need to retrieve this token from the session and use it when calling the APS API
 
   try {
-      // Get versions of an item from APS API
-      // const versions = ...
-
+      const versions = await getItemVersions(project_id, item_id, accessToken);
       res.json(versions);
   } catch (err) {
       throw err;
