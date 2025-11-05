@@ -15,5 +15,14 @@
     "cookie-session": "^2.1.1",
     "dotenv": "^17.2.3",
     "express": "^5.1.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/000000000000000Rigby0000000000000000000/fapc-auth-viewer.git"
+  },
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/000000000000000Rigby0000000000000000000/fapc-auth-viewer/issues"
+  },
+  "homepage": "https://github.com/000000000000000Rigby0000000000000000000/fapc-auth-viewer#readme"
 }
