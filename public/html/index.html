@@ -58,6 +58,22 @@
 
   <script>
     // --- Authentication check ---
+    function onstartsuccess(doc)
+    {
+      const defaultModel = doc.getRoot().getDefaultGeometry();
+      viewer.loadDocumentNode(doc, defaultModel);
+    }
+    function encodingurn(urn)
+    {
+      const encodedUrn = btoa(urn);
+      //in case of clean urn use regex.
+    }
+    function onstartfailure(error)
+    {
+      console.error('Failed to load document:', error);
+      alert('Could not load the model.');
+    }
+
     async function checkAuthStatus() {
       try {
         const response = await fetch('/api/auth/profile');
@@ -85,13 +101,23 @@
         document.getElementById('loginBtn').classList.remove('hidden');
       }
     }
-
+    
     // --- Autodesk Viewer setup ---
     let viewer;
-
+    
     async function initializeViewer(urn, accessToken) {
+      if (!urn.startsWith("urn"))
+      {
+        return;
+      }
+
+      const documentId = encodingurn(urn);
+      var resultenc = "urn:" + documentId;
+      console.log(resultenc);
+
       const options = {
-        env: 'AutodeskProduction',
+        env: 'AutodeskProduction2',
+        api: 'streamingV2',
         getAccessToken: async (onTokenReady) => {
           const response = await fetch('/api/auth/token');
           const tokenData = await response.json();
@@ -106,27 +132,14 @@
 
         if (!viewer) {
           viewer = new Autodesk.Viewing.GuiViewer3D(viewerContainer);
-          const startedCode = viewer.start();
+          const startedCode = viewer.start(resultenc, onstartsuccess, onstartfailure);
           if (startedCode > 0) {
-            console.error('Viewer could not start.');
-            return;
-          }
+              console.error('Viewer could not start.');
+              return;
+            }
         }
-
         console.log('Viewer initialized, loading model:', urn);
 
-        const documentId = urn.startsWith('urn:') ? urn : `urn:${urn}`;
-        Autodesk.Viewing.Document.load(
-          documentId,
-          (doc) => {
-            const defaultModel = doc.getRoot().getDefaultGeometry();
-            viewer.loadDocumentNode(doc, defaultModel);
-          },
-          (error) => {
-            console.error('Failed to load document:', error);
-            alert('Could not load the model.');
-          }
-        );
       });
     }
 
@@ -137,10 +150,11 @@
         alert('Please enter a model URN.');
         return;
       }
+      
       await initializeViewer(urn);
     });
-
+    
     checkAuthStatus();
-  </script>
+    </script>
 </body>
 </html>
