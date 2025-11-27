@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Item Viewer</title>
+
+
+    <link rel="stylesheet"
+        href="https://developer.api.autodesk.com/modelderivative/v2/viewers/7.*/style.min.css"
+        type="text/css">
+
+    <style>
+        body {
+            margin: 0;
+            background: #f4f4f4;
+            font-family: "Segoe UI", Arial, sans-serif;
+            overflow: hidden;
+        }
+
+   
+        #navbar + .navbar-separator {
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to right, #d9d9d9, #e6e6e6);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+        }
+
+      
+        #layout {
+            display: flex;
+            width: 100%;
+            height: calc(100vh - 90px);
+        }
+
+
+        #summaryPanel {
+            width: 35%;
+            padding: 25px;
+            background: #fff7ef;
+            border-right: 1px solid #e2c7a8;
+            overflow-y: auto;
+
+         
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+
+            animation: fadeIn 0.6s ease-out;
+        }
+
+      
+        #summaryText {
+            opacity: 0;
+            animation: fadeInText 1.2s forwards ease-out;
+            line-height: 1.5;
+            font-size: 15px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes fadeInText {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+     
+        #viewerContainer {
+            width: 65%;
+            background-color: #1f1919;
+            border-left: 1px solid #1f1919;
+        }
+
+        #titleBar {
+            padding: 20px;
+            font-size: 24px;
+            font-weight: 600;
+            background: #fff;
+            border-bottom: 1px solid #ddd;
+
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+
+<body>
+
+
+<div id="navbar"></div>
+<script>
+fetch("/html/nav.html")
+    .then(r => r.text())
+    .then(html => document.getElementById("navbar").innerHTML = html);
+</script>
+
+<div class="navbar-separator"></div>
+
+<!-- TÍTULO -->
+<div id="titleBar">Loading...</div>
+
+<!-- LAYOUT -->
+<div id="layout">
+
+    <div id="summaryPanel">
+        <h2 style="margin-top:0;">Resumo</h2>
+        <p id="summaryText">O modelo está a carregar…</p>
+    </div>
+
+    <div id="viewerContainer"></div>
+
+</div>
+
+<script src="https://developer.api.autodesk.com/modelderivative/v2/viewers/7.*/viewer3D.min.js"></script>
+
+<script>
+
+const parts = window.location.pathname.split("/");
+const category = parts[2];
+const item = parts[3];
+
+document.getElementById("titleBar").textContent = `${item.toUpperCase()}`;
+
+
+fetch("/api/summary", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ category, item })
+})
+.then(res => res.json())
+.then(data => {
+    document.getElementById("summaryText").textContent = data.summary;
+})
+.catch(() => {
+    document.getElementById("summaryText").textContent = "Failed to load AI summary.";
+});
+
+
+let MODEL_URN = null;
+
+async function loadUrn() {
+    const res = await fetch("/data/models.json");
+    const map = await res.json();
+
+    if (map[category] && map[category][item]) {
+        MODEL_URN = map[category][item];
+    } else {
+        alert("No URN found for this item");
+    }
+}
+
+
+let viewer;
+
+function encodingurn(urn) {
+    return btoa(urn);
+}
+
+async function initializeViewer(urn) {
+    if (!urn.startsWith("urn")) {
+        alert("Invalid URN format");
+        return;
+    }
+
+    const encodedUrn = encodingurn(urn);
+    let documentId = "urn:" + encodedUrn;
+
+    const options = {
+        env: "AutodeskProduction2",
+        api: "streamingV2",
+        getAccessToken: async (onTokenReady) => {
+            const response = await fetch("/api/auth/token");
+            const tokenData = await response.json();
+            onTokenReady(tokenData.access_token, tokenData.expires_in || 3600);
+        }
+    };
+
+    Autodesk.Viewing.Initializer(options, () => {
+        const container = document.getElementById("viewerContainer");
+        viewer = new Autodesk.Viewing.GuiViewer3D(container);
+
+        viewer.start();
+
+        Autodesk.Viewing.Document.load(
+            documentId,
+            (doc) => {
+                const defaultModel = doc.getRoot().getDefaultGeometry();
+                viewer.loadDocumentNode(doc, defaultModel);
+            },
+            (error) => {
+                console.error("Document load error:", error);
+                //alert("Could not load the model.");
+            }
+        );
+    });
+}
+
+(async () => {
+    await loadUrn();
+    if (MODEL_URN) {
+        const cleanUrn = decodeURIComponent(MODEL_URN);
+        await initializeViewer(cleanUrn);
+    }
+})();
+</script>
+
+</body>
+</html>

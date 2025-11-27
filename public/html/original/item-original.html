@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Item Viewer</title>
+
+    <!-- Autodesk Viewer styles -->
+    <link rel="stylesheet"
+        href="https://developer.api.autodesk.com/modelderivative/v2/viewers/7.*/style.min.css"
+        type="text/css">
+
+    <style>
+        body {
+            margin: 0;
+            background: #f8f9fb;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        /* Layout principal */
+        #layout {
+            display: flex;
+            width: 100%;
+            height: calc(100vh - 90px);
+        }
+
+        /* Painel esquerdo */
+        #summaryPanel {
+            width: 35%;
+            padding: 20px;
+            background: #ffffff;
+            border-right: 1px solid #ddd;
+            overflow-y: auto;
+        }
+
+        /* Viewer à direita */
+        #viewerContainer {
+            width: 65%;
+            background-color: #1f1919;
+            border-left: 1px solid #1f1919;
+        }
+
+        /* Título */
+        #titleBar {
+            padding: 20px;
+            font-size: 22px;
+            font-weight: bold;
+            background: #fff;
+            border-bottom: 1px solid #ddd;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<div id="navbar"></div>
+<script>
+fetch("/html/nav.html")
+    .then(r => r.text())
+    .then(html => document.getElementById("navbar").innerHTML = html);
+</script>
+
+<!-- TÍTULO -->
+<div id="titleBar">Loading...</div>
+
+<!-- LAYOUT: Resumo esquerdo + Viewer direito -->
+<div id="layout">
+
+    <div id="summaryPanel">
+        <h2>Resumo</h2>
+        <p id="summaryText">O modelo está a carregar…</p>
+    </div>
+
+    <div id="viewerContainer"></div>
+
+</div>
+
+<!-- Autodesk Viewer -->
+<script src="https://developer.api.autodesk.com/modelderivative/v2/viewers/7.*/viewer3D.min.js"></script>
+
+<script>
+/* -----------------------------------------
+   1. Extract category + item from URL
+------------------------------------------ */
+const parts = window.location.pathname.split("/");
+const category = parts[2];
+const item = parts[3];
+
+document.getElementById("titleBar").textContent =
+    `${item.toUpperCase()}`;
+
+console.log("category =", category);
+console.log("item =", item);
+
+fetch("/api/summary", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ category, item })
+})
+.then(res => res.json())
+.then(data => {
+    document.getElementById("summaryText").textContent = data.summary;
+})
+.catch(err => {
+    console.error(err);
+    document.getElementById("summaryText").textContent = "Failed to load AI summary.";
+});
+/* -----------------------------------------
+   2. Load URN from your JSON map
+------------------------------------------ */
+let MODEL_URN = null;
+
+async function loadUrn() {
+    const res = await fetch("/data/models.json");
+    const map = await res.json();
+
+    if (map[category] && map[category][item]) {
+        MODEL_URN = map[category][item];
+    } else {
+        alert("No URN found for this item");
+    }
+}
+
+/* -----------------------------------------
+   3. ORIGINAL FUNCTIONS YOU HAD
+------------------------------------------ */
+let viewer;
+
+function encodingurn(urn) {
+    return btoa(urn);
+}
+
+/* -----------------------------------------
+   4. Initialize Viewer (Patched for Document.load)
+------------------------------------------ */
+async function initializeViewer(urn) {
+
+    if (!urn.startsWith("urn")) {
+        alert("Invalid URN format");
+        return;
+    }
+
+    const encodedUrn = encodingurn(urn);
+    let documentId = "urn:" + encodedUrn;
+
+    console.log("Loading:", documentId);
+
+    // TEST MODEL? Uncomment if needed:
+    // documentId = "urn:dXJuOmFkc2sud2lkZ2V0OnFhbnVwZmJlbHF0ZWxmcmFtc3l5aW1jaTV0bnVjN2Vmb2FnY2g";
+
+    const options = {
+        env: "AutodeskProduction2",
+        api: "streamingV2",
+        getAccessToken: async (onTokenReady) => {
+            const response = await fetch("/api/auth/token");
+            const tokenData = await response.json();
+            onTokenReady(tokenData.access_token, tokenData.expires_in || 3600);
+        }
+    };
+
+    Autodesk.Viewing.Initializer(options, () => {
+        const container = document.getElementById("viewerContainer");
+        viewer = new Autodesk.Viewing.GuiViewer3D(container);
+
+        // start viewer EMPTY
+        viewer.start();
+
+        // load ACC/BIM360 document
+        Autodesk.Viewing.Document.load(
+            documentId,
+            (doc) => {
+                console.log("Document loaded OK");
+                const defaultModel = doc.getRoot().getDefaultGeometry();
+                viewer.loadDocumentNode(doc, defaultModel);
+
+                // Preenche o resumo 
+                
+
+            },
+            (error) => {
+                console.error("Document load error:", error);
+                alert("Could not load the model.");
+            }
+        );
+    });
+}
+
+/* -----------------------------------------
+   5. Final run
+------------------------------------------ */
+(async () => {
+    await loadUrn();
+
+    if (MODEL_URN) {
+        const cleanUrn = decodeURIComponent(MODEL_URN);
+        await initializeViewer(cleanUrn);
+    }
+})();
+</script>
+
+</body>
+</html>

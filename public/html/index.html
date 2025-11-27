@@ -3,77 +3,135 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Example App</title>
+  <title>EcoZumer Login</title>
 
   <!-- Autodesk Viewer styles -->
-  <link rel="stylesheet" 
-        href="https://developer.api.autodesk.com/modelderivative/v2/viewers/7.*/style.min.css" 
+  <link rel="stylesheet"
+        href="https://developer.api.autodesk.com/modelderivative/v2/viewers/7.*/style.min.css"
         type="text/css">
 
   <link rel="stylesheet" href="/css/style.css">
+
+  <style>
+    /* ---------- RESET ---------- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0d1b2a, #1b263b, #415a77);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    /* ---------- CONTAINER ---------- */
+    .login-card {
+      width: 400px;
+      background: #ffffffdd;
+      padding: 35px;
+      border-radius: 14px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+      backdrop-filter: blur(4px);
+      animation: fadeIn 0.8s ease;
+      text-align: center;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      font-size: 30px;
+      color: #1b263b;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    /* ---------- STATUS BOX ---------- */
+    .status {
+      background: #e9eef5;
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 18px;
+      text-align: left;
+      font-size: 14px;
+      color: #1b263b;
+      border-left: 4px solid #415a77;
+    }
+
+    /* ---------- BUTTONS ---------- */
+    .button {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      margin-top: 15px;
+      text-decoration: none;
+      color: white;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      background: #1b263b;
+      transition: 0.25s ease;
+    }
+
+    .button:hover {
+      background: #0d1b2a;
+      transform: scale(1.03);
+    }
+
+    .logout {
+      background: #ad2831;
+    }
+
+    .logout:hover {
+      background: #7a1c23;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
 </head>
 
 <body>
-  <h1>Example App</h1>
 
-  <!-- Authentication Status -->
-  <div class="status">
-    <p><strong>Status:</strong> <span id="authStatus">Checking...</span></p>
-    <p id="userName" class="hidden">
-      <strong>User:</strong> <span id="userNameValue"></span>
-    </p>
+  <!-- MAIN CARD -->
+  <div class="login-card">
+
+    <h1>EcoZumer Login</h1>
+
+    <!-- Authentication Status -->
+    <div class="status">
+      <p><strong>Status:</strong> <span id="authStatus">Checking...</span></p>
+      <p id="userName" class="hidden">
+        <strong>User:</strong> <span id="userNameValue"></span>
+      </p>
+    </div>
+
+    <!-- Login / Logout buttons -->
+    <div id="authButtons">
+      <a href="https://avelina-meuni-aliza.ngrok-free.dev/api/auth/login"
+         class="button hidden" id="loginBtn">Login</a>
+
+      <a href="https://avelina-meuni-aliza.ngrok-free.dev/api/auth/logout"
+         class="button logout hidden" id="logoutBtn">Logout</a>
+    </div>
+
   </div>
-
-  <!-- Login / Logout buttons -->
-  <div id="authButtons">
-    <a href="/api/auth/login" class="button hidden" id="loginBtn">Login</a>
-    <a href="/api/auth/logout" class="button logout hidden" id="logoutBtn">Logout</a>
-  </div>
-
-  <!-- API Endpoints -->
-  <h2>API Endpoints</h2>
-  <ul>
-    <li>GET /api/auth/login</li>
-    <li>GET /api/auth/logout</li>
-    <li>GET /api/auth/profile</li>
-    <li>GET /api/auth/token</li>
-  </ul>
-
-  <!-- Model input + Load button -->
-  <div style="margin-top: 20px;">
-    <input 
-      type="text" 
-      id="modelUrn" 
-      placeholder="Enter model URN (e.g. urn:adsk.wipprod:fs.file:...)" 
-      style="width: 500px; padding: 6px;"
-    >
-    <button id="loadModelBtn">Load Model</button>
-  </div>
-
-  <!-- Autodesk Viewer container -->
-  <div id="viewerContainer" style="width:100%; height:80vh; margin-top: 20px; border: 1px solid #ccc;"></div>
 
   <!-- Autodesk Viewer script -->
   <script src="https://developer.api.autodesk.com/modelderivative/v2/viewers/7.*/viewer3D.min.js"></script>
 
   <script>
     // --- Authentication check ---
-    function onstartsuccess(doc)
-    {
-      const defaultModel = doc.getRoot().getDefaultGeometry();
-      viewer.loadDocumentNode(doc, defaultModel);
-    }
-    function encodingurn(urn)
-    {
-      const encodedUrn = btoa(urn);
-      //in case of clean urn use regex.
-    }
-    function onstartfailure(error)
-    {
-      console.error('Failed to load document:', error);
-      alert('Could not load the model.');
-    }
-
     async function checkAuthStatus() {
       try {
         const response = await fetch('/api/auth/profile');
@@ -101,60 +159,9 @@
         document.getElementById('loginBtn').classList.remove('hidden');
       }
     }
-    
-    // --- Autodesk Viewer setup ---
-    let viewer;
-    
-    async function initializeViewer(urn, accessToken) {
-      if (!urn.startsWith("urn"))
-      {
-        return;
-      }
 
-      const documentId = encodingurn(urn);
-      var resultenc = "urn:" + documentId;
-      console.log(resultenc);
-
-      const options = {
-        env: 'AutodeskProduction2',
-        api: 'streamingV2',
-        getAccessToken: async (onTokenReady) => {
-          const response = await fetch('/api/auth/token');
-          const tokenData = await response.json();
-          const token = tokenData.access_token || tokenData.accessToken;
-          const expiresIn = tokenData.expires_in || 3600;
-          onTokenReady(token, expiresIn);
-        }
-      };
-
-      Autodesk.Viewing.Initializer(options, async () => {
-        const viewerContainer = document.getElementById('viewerContainer');
-
-        if (!viewer) {
-          viewer = new Autodesk.Viewing.GuiViewer3D(viewerContainer);
-          const startedCode = viewer.start(resultenc, onstartsuccess, onstartfailure);
-          if (startedCode > 0) {
-              console.error('Viewer could not start.');
-              return;
-            }
-        }
-        console.log('Viewer initialized, loading model:', urn);
-
-      });
-    }
-
-    // --- Handle Load Model button ---
-    document.getElementById('loadModelBtn').addEventListener('click', async () => {
-      const urn = document.getElementById('modelUrn').value.trim();
-      if (!urn) {
-        alert('Please enter a model URN.');
-        return;
-      }
-      
-      await initializeViewer(urn);
-    });
-    
     checkAuthStatus();
-    </script>
+  </script>
+
 </body>
 </html>

@@ -1,0 +1,41 @@
+<nav style="
+    width: 100%;
+    background: #1e293b;
+    padding: 14px 20px;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+">
+    <div>
+        <a href="/home" style="color:white; text-decoration:none; font-weight:bold; font-size:18px;">
+            EcoZumer
+        </a>
+    </div>
+
+    <div style="display:flex; gap:18px; align-items:center;">
+        <span id="navUser">Carregando...</span>
+        <a href="/api/auth/logout" 
+           style="padding:8px 14px; background:#dc2626; color:white; text-decoration:none; border-radius:6px;">
+           Logout
+        </a>
+    </div>
+</nav>
+
+<script>
+async function loadUser() {
+    try {
+        const res = await fetch('/api/auth/profile');
+        if (res.ok) {
+            const data = await res.json();
+            document.getElementById('navUser').textContent = data.name;
+        } else {
+            document.getElementById('navUser').textContent = 'Not logged';
+        }
+    } catch {
+        document.getElementById('navUser').textContent = 'Error';
+    }
+}
+
+loadUser();
+</script>

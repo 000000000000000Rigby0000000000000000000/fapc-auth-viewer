@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Example App</title>
+
+  <link rel="stylesheet" 
+        href="https://developer.api.autodesk.com/modelderivative/v2/viewers/7.*/style.min.css" 
+        type="text/css">
+
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <h1>Ecomat Login</h1>
+
+  <div class="status">
+    <p><strong>Status:</strong> <span id="authStatus">Checking...</span></p>
+    <p id="userName" class="hidden">
+      <strong>User:</strong> <span id="userNameValue"></span>
+    </p>
+  </div>
+
+  
+  <div id="authButtons">
+    <a href="https://avelina-meuni-aliza.ngrok-free.dev/api/auth/login" class="button hidden" id="loginBtn">Login</a>
+    <a href="https://avelina-meuni-aliza.ngrok-free.dev/api/auth/logout" class="button logout hidden" id="logoutBtn">Logout</a>
+  </div>
+
+  <!-- API Endpoints -->
+   <!--
+  <h2>API Endpoints</h2>
+  <ul>
+    <li>GET /api/auth/login</li>
+    <li>GET /api/auth/logout</li>
+    <li>GET /api/auth/profile</li>
+    <li>GET /api/auth/token</li>
+  </ul>
+
+  Model input + Load button 
+  <div style="margin-top: 20px;">
+    <input 
+      type="text" 
+      id="modelUrn" 
+      placeholder="Enter model URN (e.g. urn:adsk.wipprod:fs.file:...)" 
+      style="width: 500px; padding: 6px;"
+    >
+    <button id="loadModelBtn">Load Model</button>
+  </div> 
+
+   Autodesk Viewer container
+  <div id="viewerContainer" style="width:100%; height:80vh; margin-top: 20px; border: 1px solid #ccc;"></div>
+ -->
+  <!-- Autodesk Viewer script -->
+  <script src="https://developer.api.autodesk.com/modelderivative/v2/viewers/7.*/viewer3D.min.js"></script>
+
+  <script>
+
+    function onstartsuccess(doc)
+    {
+      const defaultModel = doc.getRoot().getDefaultGeometry();
+      viewer.loadDocumentNode(doc, defaultModel);
+    }
+    function encodingurn(urn)
+    {
+      const encodedUrn = btoa(urn);
+      //in case of clean urn use regex.
+    }
+    function onstartfailure(error)
+    {
+      console.error('Failed to load document:', error);
+      alert('Could not load the model.');
+    }
+
+    async function checkAuthStatus() {
+      try {
+        const response = await fetch('/api/auth/profile');
+        const statusEl = document.getElementById('authStatus');
+        const userNameEl = document.getElementById('userName');
+        const userNameValueEl = document.getElementById('userNameValue');
+        const loginBtn = document.getElementById('loginBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        if (response.ok) {
+          const data = await response.json();
+          statusEl.textContent = 'Authenticated';
+          userNameValueEl.textContent = data.name;
+          userNameEl.classList.remove('hidden');
+          loginBtn.classList.add('hidden');
+          logoutBtn.classList.remove('hidden');
+        } else {
+          statusEl.textContent = 'Not authenticated';
+          userNameEl.classList.add('hidden');
+          loginBtn.classList.remove('hidden');
+          logoutBtn.classList.add('hidden');
+        }
+      } catch (error) {
+        document.getElementById('authStatus').textContent = 'Error';
+        document.getElementById('loginBtn').classList.remove('hidden');
+      }
+    }
+    
+
+    let viewer;
+    
+    async function initializeViewer(urn, accessToken) {
+      if (!urn.startsWith("urn"))
+      {
+        return;
+      }
+
+      const documentId = encodingurn(urn);
+      var resultenc = "urn:" + documentId;
+      console.log(resultenc);
+
+      const options = {
+        env: 'AutodeskProduction2',
+        api: 'streamingV2',
+        getAccessToken: async (onTokenReady) => {
+          const response = await fetch('/api/auth/token');
+          const tokenData = await response.json();
+          const token = tokenData.access_token || tokenData.accessToken;
+          const expiresIn = tokenData.expires_in || 3600;
+          onTokenReady(token, expiresIn);
+        }
+      };
+
+      Autodesk.Viewing.Initializer(options, async () => {
+        const viewerContainer = document.getElementById('viewerContainer');
+
+        if (!viewer) {
+          viewer = new Autodesk.Viewing.GuiViewer3D(viewerContainer);
+          const startedCode = viewer.start(resultenc, onstartsuccess, onstartfailure);
+          if (startedCode > 0) {
+              console.error('Viewer could not start.');
+              return;
+            }
+        }
+        console.log('Viewer initialized, loading model:', urn);
+
+      });
+    }
+
+    document.getElementById('loadModelBtn').addEventListener('click', async () => {
+      const urn = document.getElementById('modelUrn').value.trim();
+      if (!urn) {
+        alert('Please enter a model URN.');
+        return;
+      }
+      
+      await initializeViewer(urn);
+    });
+    
+    checkAuthStatus();
+    </script>
+</body>
+</html>
