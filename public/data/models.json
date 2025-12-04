@@ -1,17 +1,9 @@
 {
-    "wood": {
-        "wood1": "urn%3Aadsk.wipprod%3Adm.lineage%3AvK-4Y9NQUfO1xgxKDyUDjw",
-        "wood2": "urn%3Aadsk.wipprod%3Adm.lineage%3Ae43CJ-INW16tyT0YfuoUJw",
-        "wood3": "urn%3Aadsk.wipprod%3Adm.lineage%3Ae43CJ-INW16tyT0YfuoUJw"
-    },
-    "steel": {
-        "steel1": "urn%3Aadsk.wipprod%3Adm.lineage%3AvK-4Y9NQUfO1xgxKDyUDjw",
-        "steel2": "urn%3Aadsk.wipprod%3Adm.lineage%3AvK-4Y9NQUfO1xgxKDyUDjw",
-        "steel3": "urn%3Aadsk.wipprod%3Adm.lineage%3AvK-4Y9NQUfO1xgxKDyUDjw"
-    },
-    "plastic": {
-        "plastic1": "urn%3Aadsk.wipprod%3Adm.lineage%3AvK-4Y9NQUfO1xgxKDyUDjw",
-        "plastic2": "urn%3Aadsk.wipprod%3Adm.lineage%3AvK-4Y9NQUfO1xgxKDyUDjw",
-        "plastic3": "urn%3Aadsk.wipprod%3Adm.lineage%3AvK-4Y9NQUfO1xgxKDyUDjw"
+    "Projects": {
+        "Arquitetura_sofia": "urn:adsk.wipprod:fs.file:vf.gMqPYrncQ-mkzGOVkPpKGA?version=1",
+        "Ponte_Samuel": "urn:adsk.wipprod:fs.file:vf.gMqPYrncQ-mkzGOVkPpKGA?version=1",
+        "Ponte": "urn:adsk.wipprod:fs.file:vf.8iUu9CY0SkOvb6P-D6VLeg?version=1",
+        "Ponte_Sofia": "urn:adsk.wipprod:fs.file:vf.4077uQfTQeKH-wWCoaUNjg?version=1",
+        "Torre_Rodrigo": "urn:adsk.wipprod:fs.file:vf.4077uQfTQeKH-wWCoaUNjg?version=1"
     }
 }
