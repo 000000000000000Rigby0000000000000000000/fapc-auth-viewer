@@ -17,7 +17,7 @@
             overflow: hidden;
         }
 
-   
+    
         #navbar + .navbar-separator {
             width: 100%;
             height: 4px;
@@ -40,7 +40,7 @@
             border-right: 1px solid #e2c7a8;
             overflow-y: auto;
 
-         
+          
             box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
 
             animation: fadeIn 0.6s ease-out;
@@ -64,7 +64,7 @@
             to { opacity: 1; }
         }
 
-     
+      
         #viewerContainer {
             width: 65%;
             background-color: #1f1919;
@@ -95,10 +95,8 @@ fetch("/html/nav.html")
 
 <div class="navbar-separator"></div>
 
-<!-- TÍTULO -->
 <div id="titleBar">Loading...</div>
 
-<!-- LAYOUT -->
 <div id="layout">
 
     <div id="summaryPanel">
@@ -121,21 +119,89 @@ const item = parts[3];
 document.getElementById("titleBar").textContent = `${item.toUpperCase()}`;
 
 
-fetch("/api/summary", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ category, item })
-})
-.then(res => res.json())
-.then(data => {
-    document.getElementById("summaryText").textContent = data.summary;
-})
-.catch(() => {
-    document.getElementById("summaryText").textContent = "Failed to load AI summary.";
-});
-
 
 let MODEL_URN = null;
+let viewer;
+
+let initialProjectSummary = "O modelo está a carregar…"; 
+
+
+function setSummaryText(text, isProjectLevel = false) {
+    document.getElementById("summaryText").textContent = text;
+    
+    const summaryTextElement = document.getElementById("summaryText");
+    summaryTextElement.style.opacity = 0;
+    setTimeout(() => { summaryTextElement.style.opacity = 1; }, 50);
+
+    if (isProjectLevel) {
+        initialProjectSummary = text; 
+    }
+}
+
+
+async function fetchSummary(payload, isElementSummary = false) {
+    if (isElementSummary) {
+        setSummaryText("A processar os dados do elemento com a AI...");
+    }
+
+    try {
+        const res = await fetch("/api/summary", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        
+        if (data.summary) {
+            setSummaryText(data.summary, !isElementSummary); 
+        } else {
+            setSummaryText("Falha ao gerar resumo. " + (data.error || ""), !isElementSummary);
+        }
+
+    } catch (err) {
+        console.error("Fetch Summary Error:", err);
+        setSummaryText("Erro de comunicação com o servidor.", !isElementSummary);
+    }
+}
+
+
+function onElementSelected(event) {
+    const dbIds = event.dbIdArray;
+    
+    if (dbIds.length === 0) {
+        setSummaryText(initialProjectSummary);
+        return;
+    }
+
+    const dbId = dbIds[0];
+
+    viewer.getProperties(dbId, (result) => {
+        if (!result || result.properties.length === 0) {
+            setSummaryText("Não foram encontradas propriedades para este elemento.");
+            return;
+        }
+     
+        let propertiesText = `Element Name: ${result.name || 'N/A'}\n`;
+        
+        result.properties.forEach(prop => {
+            
+            if (prop.displayCategory && prop.displayCategory !== '__internal__') {
+                propertiesText += `${prop.displayName} [${prop.displayCategory}]: ${prop.displayValue}\n`;
+            }
+        });
+
+        fetchSummary({ propertiesText }, true);
+        
+    }, (error) => {
+        console.error("Error getting properties:", error);
+        setSummaryText("Erro ao obter as propriedades do elemento.");
+    });
+}
+
+
+function encodingurn(urn) {
+    return btoa(urn).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
 
 async function loadUrn() {
     const res = await fetch("/data/models.json");
@@ -149,12 +215,6 @@ async function loadUrn() {
 }
 
 
-let viewer;
-
-function encodingurn(urn) {
-    return btoa(urn).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-}
-
 async function initializeViewer(urn) {
     if (!urn.startsWith("urn")) {
         alert("Invalid URN format");
@@ -163,7 +223,7 @@ async function initializeViewer(urn) {
 
     const encodedUrn = encodingurn(urn);
     let documentId = "urn:" + encodedUrn;
-    console.log(documentId);
+    
     const options = {
         env: "AutodeskProduction2",
         api: "streamingV2",
@@ -185,6 +245,11 @@ async function initializeViewer(urn) {
             (doc) => {
                 const defaultModel = doc.getRoot().getDefaultGeometry();
                 viewer.loadDocumentNode(doc, defaultModel);
+                
+                
+                viewer.addEventListener(Autodesk.Viewing.SELECTION_CHANGED_EVENT, onElementSelected);
+                console.log("APS Viewer initialized and selection listener attached.");
+                // -----------------------------------
             },
             (error) => {
                 console.error("Document load error:", error);
@@ -193,6 +258,7 @@ async function initializeViewer(urn) {
         );
     });
 }
+fetchSummary({ category, item }, false); 
 
 (async () => {
     await loadUrn();

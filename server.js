@@ -11,7 +11,6 @@ app.use(session({ secret: SERVER_SESSION_SECRET, maxAge: 24 * 60 * 60 * 1000 }))
 app.use(require('./src/routes/auth.js'));
 app.use(require('./src/routes/data-management.js'));
 
-
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'html', 'index.html'));
 });

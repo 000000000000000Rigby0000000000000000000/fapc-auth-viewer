@@ -126,11 +126,11 @@
 <body>
     <header>
         <h1>EcoZumer</h1>
-        <!-- <p style="margin-top:8px; color:#555; font-size:14px;">Choose a category and click an item</p> -->
+        <p style="margin-top:8px; color:#555; font-size:14px;">Choose a category and click an item</p> 
     </header>
 
     <div class="container">
-        <!-- Category: Wood -->
+
         <section class="category" aria-labelledby="cat-wood">
             <div class="category-header">
                 <div>
@@ -141,32 +141,32 @@
 
             <div class="row" role="list">
                 <div class="item" role="listitem" onclick="goTo('Projects','Arquitetura_sofia')">
-                    <img src="https://via.placeholder.com/320x180.png?text=Wood+1" alt="">
+                    <img id="thumb_Arquitetura_sofia" alt="">
                     <div class="label">Arquitetura Sofia</div>
                 </div>
 
                 <div class="item" role="listitem" onclick="goTo('Projects','Ponte_Samuel')">
-                    <img src="https://via.placeholder.com/320x180.png?text=Wood+2" alt="">
+                    <img id="thumb_Ponte_Samuel" alt="">
                     <div class="label">Ponte Samuel</div>
                 </div>
 
                 <div class="item" role="listitem" onclick="goTo('Projects','Ponte')">
-                    <img src="https://via.placeholder.com/320x180.png?text=Wood+3" alt="">
+                    <img id="thumb_Ponte" alt="">
                     <div class="label">Ponte</div>
                 </div>
 
                 <div class="item" role="listitem" onclick="goTo('Projects','Ponte_Sofia')">
-                    <img src="https://via.placeholder.com/320x180.png?text=Wood+1" alt="">
+                    <img id="thumb_Ponte_Sofia" alt="">
                     <div class="label">Ponte_Sofia</div>
 
                 </div><div class="item" role="listitem" onclick="goTo('Projects','Torre_Sofia')">
-                    <img src="https://via.placeholder.com/320x180.png?text=Wood+1" alt="">
+                    <img id="thumb_Torre_Sofia" alt="">
                     <div class="label">Torre_Sofia</div>
                 </div>
             </div>
         </section>
 
-        <!--
+        
         Category: Steel 
         <section class="category" aria-labelledby="cat-steel">
             <div class="category-header">
@@ -219,7 +219,7 @@
                     <div class="label">Part C</div>
                 </div>
             </div>
-        </section> -->
+        </section> 
     </div>
     <div id="navbar"></div>
     <script>
@@ -235,5 +235,34 @@
             window.location.href = `/home/${encodeURIComponent(category)}/${encodeURIComponent(item)}`;
         }
     </script>
+
+    <script>
+        async function loadThumbnails() {
+            // Load the URNs from your JSON file
+            const res = await fetch("/data/models.json");
+            const models = await res.json();
+
+            const projects = models["Projects"];
+
+            for (const [projectName, urn] of Object.entries(projects)) {
+                const img = document.getElementById("thumb_" + projectName);
+                if (!img) continue;
+
+                // Convert URN to base64 for safe URL use
+                const urnBase64 = btoa(urn);
+
+                try {
+                    const thumbRes = await fetch(`/api/thumbnail/${urnBase64}`);
+                    const data = await thumbRes.json();
+                    img.src = data.image;
+                } catch (err) {
+                    img.src = "/html/img/error.png"; // fallback
+                }
+            }
+        }
+
+        loadThumbnails();
+    </script>
+
 </body>
 </html>

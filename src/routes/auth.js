@@ -1,11 +1,26 @@
 const express = require('express');
 const path = require('path');
+const fetch = require('node-fetch'); 
 const OpenAI = require("openai");
 const { getAuthorizationUrl, getUserProfile } = require('../controllers/auth.js');
 const { authCallbackMiddleware, authRefreshMiddleware } = require('../middlewares/auth.js');
-const { OPENAI_API_KEY } = require('../../config.js');
+const { OPENAI_API_KEY } = require('../../config.js'); 
 
 let router = express.Router();
+
+const openaiClient = new OpenAI({
+    apiKey: OPENAI_API_KEY
+});
+
+async function getAISummary(prompt) {
+    const response = await openaiClient.chat.completions.create({
+        model: "gpt-4o-mini", 
+        messages: [{ role: "user", content: prompt }],
+        max_tokens: 150
+    });
+    
+    return response.choices[0].message.content.trim();
+}
 
 
 router.get('/api/auth/login', (req, res) => {
@@ -45,40 +60,46 @@ router.get('/api/auth/profile', authRefreshMiddleware, async (req, res, next) =>
 
 router.post("/api/summary", async (req, res) => {
     try {
-        const { category, item } = req.body;
+        const { category, item, propertiesText } = req.body;
+        let prompt = '';
 
-        if (!category || !item) {
-            return res.status(400).json({ error: "Missing category or item" });
-        }
-
-        const client = new OpenAI({
-            apiKey: OPENAI_API_KEY
-        });
-
-        const prompt = `
+        if (propertiesText) {
+            
+            if (!OPENAI_API_KEY) {
+                console.warn("OPENAI_API_KEY is missing. Cannot generate summary.");
+                return res.status(500).json({ error: "OpenAI API Key is missing." });
+            }
+            
+            prompt = `
 You are an expert BIM engineer.
+Analyze the following element properties from a 3D model:
+---
+${propertiesText}
+---
 
+Write a clean, technical 4–6 line summary of this element.
+Focus only on: functional purpose, materials, structural behavior, and where it is typically used, based *only* on the provided data.
+If critical information (like material or size) is missing, mention it briefly.
+
+No introductions, no disclaimers, no lists, no markdown. Just plain text.
+`;
+        } else if (category && item) {
+            
+            prompt = `
+You are an expert BIM engineer.
 Write a clean, technical 4–6 line summary of a construction model element.
-Focus only on:
-- functional purpose
-- materials
-- structural behavior
-- where it is typically used
+Focus only on: functional purpose, materials, structural behavior, and where it is typically used.
 
 Category: ${category}
 Item: ${item}
 
 No introductions, no disclaimers, no lists, no markdown. Just plain text.
 `;
+        } else {
+            return res.status(400).json({ error: "Missing category/item or element properties" });
+        }
 
-        const response = await client.responses.create({
-            model: "gpt-4o-mini",
-            input: prompt,
-            max_output_tokens: 150
-        });
-
-        const summary = response.output[0].content[0].text;
-
+        const summary = await getAISummary(prompt);
         res.json({ summary });
 
     } catch (err) {
@@ -86,5 +107,6 @@ No introductions, no disclaimers, no lists, no markdown. Just plain text.
         res.status(500).json({ error: "AI summary failed" });
     }
 });
+
 
 module.exports = router;
