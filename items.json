@@ -1,0 +1,29 @@
+{
+  "projetos": [
+    {
+      "nome": "Lista Items",
+      "itens": [
+        { "id": 1, "descricao": "Betão pré-esforçado C50/60", "quantidade": "4.500 m³", "fabricante": "ConcreSofia", "preco_unitario": 130, "total": 585000 },
+        { "id": 2, "descricao": "Viga-caixa pré-fabricada", "quantidade": "18 un", "fabricante": "PreTen Iberia", "preco_unitario": 45000, "total": 810000 },
+        { "id": 3, "descricao": "Treliça metálica auxiliar", "quantidade": "22 t", "fabricante": "MetalBridge", "preco_unitario": 2200, "total": 48400 },
+        { "id": 4, "descricao": "Betão estrutural C30/37", "quantidade": "2.100 m³", "fabricante": "ConcreSofia", "preco_unitario": 95, "total": 199500 },
+        { "id": 5, "descricao": "Aço para armaduras B500", "quantidade": "680 t", "fabricante": "SteelRod EU", "preco_unitario": 1150, "total": 782000 },
+        { "id": 6, "descricao": "Cabos de pré-esforço", "quantidade": "95 km", "fabricante": "TensoCable", "preco_unitario": 6200, "total": 589000 },
+        { "id": 7, "descricao": "Aparelhos de apoio elastoméricos", "quantidade": "36 un", "fabricante": "FlexSupport", "preco_unitario": 4800, "total": 172800 },
+        { "id": 8, "descricao": "Sistema de impermeabilização", "quantidade": "9.200 m²", "fabricante": "HydroSeal", "preco_unitario": 18, "total": 165600 },
+        { "id": 9, "descricao": "Revestimento anticorrosivo", "quantidade": "6.500 m²", "fabricante": "ProtectCoat", "preco_unitario": 14, "total": 91000 },
+        { "id": 10, "descricao": "Pedra/granito reaproveitado", "quantidade": "180 m³", "fabricante": "StoneReuse", "preco_unitario": 210, "total": 37800 },
+        { "id": 11, "descricao": "Reforço estrutural em fibra (FRP)", "quantidade": "1.100 m²", "fabricante": "FiberBuild", "preco_unitario": 75, "total": 82500 },
+        { "id": 12, "descricao": "Cofragem metálica", "quantidade": "3.800 m²", "fabricante": "FormSteel", "preco_unitario": 42, "total": 159600 },
+        { "id": 13, "descricao": "Andaimes e escoramentos", "quantidade": "1 lote", "fabricante": "SafeScaffold", "preco_unitario": 95000, "total": 95000 },
+        { "id": 14, "descricao": "Drenagem pluvial", "quantidade": "420 m", "fabricante": "AquaDrain", "preco_unitario": 65, "total": 27300 },
+        { "id": 15, "descricao": "Juntas de dilatação", "quantidade": "12 un", "fabricante": "MoveJoint", "preco_unitario": 9500, "total": 114000 },
+        { "id": 16, "descricao": "Barreiras de segurança", "quantidade": "680 m", "fabricante": "RoadSafe", "preco_unitario": 120, "total": 81600 },
+        { "id": 17, "descricao": "Iluminação estrutural LED", "quantidade": "48 un", "fabricante": "LumaBridge", "preco_unitario": 1450, "total": 69600 },
+        { "id": 18, "descricao": "Sensores estruturais", "quantidade": "32 un", "fabricante": "SmartStruct", "preco_unitario": 2200, "total": 70400 },
+        { "id": 19, "descricao": "Transporte pesado", "quantidade": "1 lote", "fabricante": "TransHeavy", "preco_unitario": 160000, "total": 160000 },
+        { "id": 20, "descricao": "Mão de obra especializada", "quantidade": "1 lote", "fabricante": "BuildCore", "preco_unitario": 420000, "total": 420000 }
+      ]
+    }
+  ]
+}

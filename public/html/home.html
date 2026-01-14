@@ -7,62 +7,121 @@
     <link rel="stylesheet" href="/css/style.css" />
 
     <style>
-        :root{
-            --gap: 18px;
-            --item-w: 220px;
-            --item-h: 140px;
-            --radius: 10px;
+        /* --- 🎨 Enhanced Variables for a Polished Look --- */
+        :root {
+            --gap: 20px;
+            --item-w: 240px;
+            --item-h: 150px;
+            --radius: 12px;
+            --color-bg-start: #c6e4ff;
+            --color-bg-end: #ffffff;
+            --color-primary: #3b82f6;
+            --color-secondary: #059669; /* New: A complementary color (green) */
+            --color-text-dark: #1f2937;
+            --color-text-medium: #6b7280;
+            --shadow-subtle: 0 4px 10px rgba(0, 0, 0, 0.04);
+            --shadow-hover: 0 12px 28px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+            --navbar-height: 60px;
         }
 
+        /* --- Keyframe Animations --- */
+        @keyframes fadeInSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes colorPulse {
+            0% { border-color: #e5e7eb; }
+            50% { border-color: #d1d5db; }
+            100% { border-color: #e5e7eb; }
+        }
+
+        /* --- Global Resets and Enhanced Body Style --- */
         body {
             max-width: none;
             margin: 0;
             padding: 24px;
-            background: #f6f7fb;
-            font-family: Arial, Helvetica, sans-serif;
-            color: #222;
+            background: linear-gradient(180deg, var(--color-bg-start) 0%, var(--color-bg-end) 1500px, #ffffff 100%);
+            background-attachment: fixed;
+            padding-bottom: calc(24px + var(--navbar-height));
+            font-family: 'Inter', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            color: var(--color-text-dark);
+            line-height: 1.5;
         }
 
+        /* --- Header Styling --- */
         header {
             text-align: center;
-            margin-bottom: 18px;
+            margin-bottom: 32px;
         }
 
         header h1 {
             margin: 0;
-            font-size: 28px;
-            letter-spacing: 0.4px;
+            font-size: 32px;
+            letter-spacing: -0.2px;
+            font-weight: 800;
+            color: var(--color-primary);
+        }
+
+        header p {
+            margin-top: 8px;
+            color: var(--color-text-medium);
+            font-size: 15px;
         }
 
         .container {
             width: 100%;
-            max-width: 1100px;
+            max-width: 1200px;
             margin: 0 auto;
         }
 
+        /* --- Category Section Styling (White Block with character) --- */
         .category {
-            background: white;
-            border-radius: 12px;
-            padding: 18px;
-            margin-bottom: 18px;
-            box-shadow: 0 6px 18px rgba(20,20,40,0.04);
+            /* Slight inner gradient for depth */
+            background: linear-gradient(180deg, #fefefe 0%, #ffffff 100%);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 32px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+            transition: box-shadow 0.3s ease;
+        }
+
+        /* Add subtle animation effect to the category block on hover/focus */
+        .category:hover {
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
         }
 
         .category-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 12px;
+            margin-bottom: 18px;
+            /* Enhanced border style for the accent */
+            border-left: 6px solid var(--color-primary); 
+            padding-left: 14px;
         }
 
+        /* NEW: Gradient/Colorized Title Text */
         .category-title {
-            font-size: 18px;
-            font-weight: 700;
+            font-size: 24px; /* Slightly bigger */
+            font-weight: 800;
+            /* Apply a text color gradient for character */
+            background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: var(--color-primary); /* Fallback */
         }
 
         .category-sub {
-            font-size: 13px;
-            color: #666;
+            font-size: 14px;
+            color: var(--color-text-medium);
+            margin-top: 4px; /* More space */
         }
 
         .row {
@@ -70,63 +129,102 @@
             gap: var(--gap);
             justify-content: flex-start;
             flex-wrap: nowrap;
-            overflow-x: auto; /* allow horizontal scroll on small screens */
-            padding-bottom: 6px;
+            overflow-x: auto;
+            padding-bottom: 12px;
+            scroll-snap-type: x mandatory;
         }
 
-        /* Item card */
+        /* --- Item Card Styling with Animation --- */
         .item {
             min-width: var(--item-w);
             width: var(--item-w);
             height: var(--item-h);
             border-radius: var(--radius);
-            background: linear-gradient(135deg, #e9eefb, #f3f6ff);
+            background: #ffffff;
+            /* Initial border animated subtly */
+            border: 1px solid #f3f4f6;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: transform .16s ease, box-shadow .16s ease;
-            box-shadow: 0 4px 10px rgba(20,20,40,0.06);
+            transition: all .3s cubic-bezier(0.25, 0.8, 0.25, 1); /* Smoother, bouncier transition */
+            box-shadow: var(--shadow-subtle);
             flex: 0 0 auto;
             text-align: center;
             padding: 12px;
+            scroll-snap-align: start;
+
+            /* Apply initial load animation */
+            opacity: 0;
+            animation: fadeInSlideUp 0.6s ease forwards;
         }
 
+        /* Apply staggered delay to items */
+        .item:nth-child(1) { animation-delay: 0.1s; }
+        .item:nth-child(2) { animation-delay: 0.2s; }
+        .item:nth-child(3) { animation-delay: 0.3s; }
+        .item:nth-child(4) { animation-delay: 0.4s; }
+        .item:nth-child(5) { animation-delay: 0.5s; }
+
         .item img {
-            width: 80%;
-            height: 70px;
+            width: 100%;
+            height: 80px;
             object-fit: cover;
-            border-radius: 6px;
-            margin-bottom: 8px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08); /* Darker image shadow */
         }
 
         .item .label {
             font-weight: 600;
-            font-size: 14px;
-            color: #0f1724;
+            font-size: 15px;
+            color: var(--color-text-dark);
         }
 
+        /* Enhanced Hover State */
         .item:hover {
-            transform: translateY(-6px) scale(1.02);
-            box-shadow: 0 10px 22px rgba(15,20,35,0.12);
+            transform: translateY(-10px) scale(1.03); /* Deeper lift and slight scale */
+            box-shadow: 0 18px 35px rgba(15,20,35,0.2); /* More powerful shadow */
+            background: var(--color-bg-end);
+            border-color: var(--color-primary); /* Primary color border highlight */
         }
 
-        /* scrollbar style for webkit (optional nicer look) */
-        .row::-webkit-scrollbar { height: 8px; }
-        .row::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 6px; }
+        /* --- Scrollbar Styling (No change) --- */
+        .row::-webkit-scrollbar { height: 10px; }
+        .row::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        .row::-webkit-scrollbar-thumb { background: rgba(59, 130, 246, 0.4); border-radius: 10px; }
+        .row::-webkit-scrollbar-thumb:hover { background: var(--color-primary); }
 
-        /* Responsive: stack items when screen very small */
-        @media (max-width: 640px) {
-            :root { --item-w: 180px; --item-h: 120px; }
+
+        /* --- Navbar Fixed to Bottom (No change) --- */
+        #navbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
+            background-color: white;
+            height: var(--navbar-height);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
+        /* --- Responsive Adjustments (No change) --- */
+        @media (max-width: 768px) {
+            .container { padding: 0 12px; }
+            body { padding: 18px 0; padding-bottom: calc(18px + var(--navbar-height)); }
+            .category { padding: 18px; margin: 0 12px 24px 12px; }
+            :root { --item-w: 200px; --item-h: 130px; --gap: 15px; }
+        }
     </style>
 </head>
 <body>
     <header>
         <h1>EcoZumer</h1>
-        <p style="margin-top:8px; color:#555; font-size:14px;">Choose a category and click an item</p> 
+        <p>Choose a project category and click on an item to view details.</p>
     </header>
 
     <div class="container">
@@ -135,93 +233,41 @@
             <div class="category-header">
                 <div>
                     <div id="cat-wood" class="category-title">Projects</div>
-                    <div class="category-sub">Acc Samples</div>
+                    <div class="category-sub">Accelerated Samples Portfolio</div>
                 </div>
             </div>
 
             <div class="row" role="list">
                 <div class="item" role="listitem" onclick="goTo('Projects','Arquitetura_sofia')">
-                    <img id="thumb_Arquitetura_sofia" alt="">
+                    <img src="/images/placeholders/thumb_Arquitetura_sofia.jpg" id="thumb_Arquitetura_sofia" alt="Thumbnail for Arquitetura Sofia">
                     <div class="label">Arquitetura Sofia</div>
                 </div>
 
                 <div class="item" role="listitem" onclick="goTo('Projects','Ponte_Samuel')">
-                    <img id="thumb_Ponte_Samuel" alt="">
+                    <img src="/images/placeholders/thumb_Ponte_Samuel.jpg" id="thumb_Ponte_Samuel" alt="Thumbnail for Ponte Samuel">
                     <div class="label">Ponte Samuel</div>
                 </div>
 
                 <div class="item" role="listitem" onclick="goTo('Projects','Ponte')">
-                    <img id="thumb_Ponte" alt="">
-                    <div class="label">Ponte</div>
+                    <img src="/images/placeholders/thumb_Ponte.jpg" id="thumb_Ponte" alt="Thumbnail for Ponte">
+                    <div class="label">Edificio</div>
                 </div>
 
                 <div class="item" role="listitem" onclick="goTo('Projects','Ponte_Sofia')">
-                    <img id="thumb_Ponte_Sofia" alt="">
-                    <div class="label">Ponte_Sofia</div>
+                    <img src="/images/placeholders/thumb_Ponte_Sofia.jpg" id="thumb_Ponte_Sofia" alt="Thumbnail for Ponte Sofia">
+                    <div class="label">Ponte Sofia</div>
+                </div>
 
-                </div><div class="item" role="listitem" onclick="goTo('Projects','Torre_Sofia')">
-                    <img id="thumb_Torre_Sofia" alt="">
-                    <div class="label">Torre_Sofia</div>
+                <div class="item" role="listitem" onclick="goTo('Projects','Torre_Sofia')">
+                    <img src="/images/placeholders/thumb_Torre_Sofia.jpg" id="thumb_Torre_Sofia" alt="Thumbnail for Torre Sofia">
+                    <div class="label">Torre Sofia</div>
                 </div>
             </div>
         </section>
 
-        
-        Category: Steel 
-        <section class="category" aria-labelledby="cat-steel">
-            <div class="category-header">
-                <div>
-                    <div id="cat-steel" class="category-title">Steel</div>
-                    <div class="category-sub">Beams, sheets and rods</div>
-                </div>
-            </div>
-
-            <div class="row" role="list">
-                <div class="item" role="listitem" onclick="goTo('steel','steel1')">
-                    <img src="https://via.placeholder.com/320x180.png?text=Steel+1" alt="Steel item 1">
-                    <div class="label">Steel Beam A</div>
-                </div>
-
-                <div class="item" role="listitem" onclick="goTo('steel','steel2')">
-                    <img src="https://via.placeholder.com/320x180.png?text=Steel+2" alt="Steel item 2">
-                    <div class="label">Steel Sheet B</div>
-                </div>
-
-                <div class="item" role="listitem" onclick="goTo('steel','steel3')">
-                    <img src="https://via.placeholder.com/320x180.png?text=Steel+3" alt="Steel item 3">
-                    <div class="label">Steel Rod C</div>
-                </div>
-            </div>
-        </section>
-
-   
-        <section class="category" aria-labelledby="cat-plastic">
-            <div class="category-header">
-                <div>
-                    <div id="cat-plastic" class="category-title">Plastic</div>
-                    <div class="category-sub">Sheets, pellets and parts</div>
-                </div>
-            </div>
-
-            <div class="row" role="list">
-                <div class="item" role="listitem" onclick="goTo('plastic','plastic1')">
-                    <img src="https://via.placeholder.com/320x180.png?text=Plastic+1" alt="Plastic item 1">
-                    <div class="label">Plastic Sheet A</div>
-                </div>
-
-                <div class="item" role="listitem" onclick="goTo('plastic','plastic2')">
-                    <img src="https://via.placeholder.com/320x180.png?text=Plastic+2" alt="Plastic item 2">
-                    <div class="label">Pellet B</div>
-                </div>
-
-                <div class="item" role="listitem" onclick="goTo('plastic','plastic3')">
-                    <img src="https://via.placeholder.com/320x180.png?text=Plastic+3" alt="Plastic item 3">
-                    <div class="label">Part C</div>
-                </div>
-            </div>
-        </section> 
     </div>
     <div id="navbar"></div>
+
     <script>
     fetch("/html/nav.html")
         .then(r => r.text())
@@ -230,38 +276,8 @@
 
     <script>
         function goTo(category, item) {
-            // Example redirect. Adjust route to whatever your server expects.
-            // e.g. /home/wood/item1  or /items?cat=wood&id=item1
             window.location.href = `/home/${encodeURIComponent(category)}/${encodeURIComponent(item)}`;
         }
-    </script>
-
-    <script>
-        async function loadThumbnails() {
-            // Load the URNs from your JSON file
-            const res = await fetch("/data/models.json");
-            const models = await res.json();
-
-            const projects = models["Projects"];
-
-            for (const [projectName, urn] of Object.entries(projects)) {
-                const img = document.getElementById("thumb_" + projectName);
-                if (!img) continue;
-
-                // Convert URN to base64 for safe URL use
-                const urnBase64 = btoa(urn);
-
-                try {
-                    const thumbRes = await fetch(`/api/thumbnail/${urnBase64}`);
-                    const data = await thumbRes.json();
-                    img.src = data.image;
-                } catch (err) {
-                    img.src = "/html/img/error.png"; // fallback
-                }
-            }
-        }
-
-        loadThumbnails();
     </script>
 
 </body>
